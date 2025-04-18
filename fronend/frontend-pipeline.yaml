@@ -1,0 +1,28 @@
+trigger:
+  paths:
+    include:
+      - frontend/**
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '18.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    cd frontend
+    npm install
+    npm run build
+  displayName: 'Build React App'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: 'frontend/build'
+    artifactName: 'frontend'
+    publishLocation: 'Container'
