@@ -1,11 +1,11 @@
 ---
-trigger:
-  paths:
-    include:
-      - frontend/**
-  branches:
-    include:
-      - main
+# trigger:
+#   paths:
+#     include:
+#       - frontend/**
+#   branches:
+#     include:
+#       - main
 
 pool:
   vmImage: 'ubuntu-latest'
