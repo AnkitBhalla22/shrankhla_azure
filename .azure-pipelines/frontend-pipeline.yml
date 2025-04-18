@@ -20,9 +20,3 @@ steps:
     npm install
     npm run build
   displayName: 'Build React App'
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: 'frontend/build'
-    artifactName: 'frontend'
-    publishLocation: 'Container'
