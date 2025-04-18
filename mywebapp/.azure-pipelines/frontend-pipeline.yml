@@ -1,0 +1,42 @@
+---
+trigger:
+  paths:
+    include:
+      - frontend/**
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'my-frontend-app'
+  dockerRegistryServiceConnection: 'AzureContainerRegistry'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: 18.x
+  displayName: 'Install Node.js'
+
+- script: |
+    cd frontend
+    npm install
+    npm run build
+  displayName: 'Build React App'
+
+- script: |
+    echo "Verifying build folder:"
+    ls -la frontend/build
+  displayName: 'Check build output'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: '$(dockerRegistryServiceConnection)'  # e.g., 'DockerHub', 'AzureContainerRegistry'
+    repository: '$(imageName)'
+    command: 'buildAndPush'
+    Dockerfile: 'frontend/Dockerfile'
+    tags: |
+      $(Build.BuildId)
+  displayName: 'Build and Push Docker Image'

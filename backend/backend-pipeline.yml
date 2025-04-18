@@ -1,3 +1,4 @@
+---
 trigger:
   paths:
     include:
@@ -7,27 +8,36 @@ trigger:
       - main
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
 variables:
-  buildConfiguration: 'Release'
+  imageName: 'my-backend-app'
 
 steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
     version: '8.0.x'
-    installationPath: $(Agent.ToolsDirectory)/dotnet
+  displayName: 'Install .NET SDK'
 
 - script: |
     cd backend
     dotnet restore
-    dotnet build --configuration $(buildConfiguration)
-    dotnet publish -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/publish
-  displayName: 'Build and Publish .NET App'
+    dotnet build --no-restore -c Release
+    dotnet publish --no-restore -c Release -o out
+  displayName: 'Build & Publish .NET App'
 
-- task: PublishBuildArtifacts@1
+- script: |
+    echo "Published output:"
+    ls -la backend/out
+  displayName: 'Verify Publish Output'
+
+- task: Docker@2
   inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)/publish'
-    artifactName: 'backend'
-    publishLocation: 'Container'
+    containerRegistry: '<your-service-connection-name>'  # e.g. DockerHub, ACR
+    repository: '$(imageName)'
+    command: 'buildAndPush'
+    Dockerfile: 'backend/Dockerfile'
+    tags: |
+      $(Build.BuildId)
+  displayName: 'Build and Push Docker Image'
